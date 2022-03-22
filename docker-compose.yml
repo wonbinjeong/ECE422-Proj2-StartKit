@@ -2,7 +2,7 @@ version: '3'
 
 services:
   web:
-    image: henaras/simpleweb:1
+    image: web
     ports:
       - "8000:8000"
     deploy:

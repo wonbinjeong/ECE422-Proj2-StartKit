@@ -10,7 +10,7 @@ import random
 import time
 
 app = Flask(__name__)
-redis = Redis(host='redis', port=6379)
+redis = Redis(host='localhost', port=6379)
 
 
 def difficult_function():
@@ -34,4 +34,5 @@ def hello():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(host="localhost", port=8000, debug=True)
+    print("HIHIHI")
