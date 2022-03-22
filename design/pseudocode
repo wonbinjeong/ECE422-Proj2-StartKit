@@ -1,0 +1,24 @@
+upper_threshold = X
+lower_threshold = Y
+monitoring_interval = Z
+req_per_container = 3
+
+function auto_scale() {
+    while True:
+        start_monitoring_time = get_current_time()
+        response_times = []
+        prev_hits = redis.get('hits')
+        while(get_current_time() - start_monitoring_time < monitoring_interval)
+            response_time = getRequestResponseTime()
+            response_times.append(response_time)
+        average_response_time = average(response_times)
+        curr_hits = redis.get('hits')
+        num_req = curr_hits - prev_hits
+        if average_response_time > upper_threshold or average_response_time < lower_threshold:
+            scale(num_req)
+}
+
+function scale(num_req) {
+    num_containers = ceil(num_req / req_per_container)
+    set_docker_replicas(num_containers)
+}
