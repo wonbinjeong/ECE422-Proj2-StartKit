@@ -2,7 +2,7 @@ version: '3'
 
 services:
   web:
-    image: web
+    image: henaras/simpleweb:1
     ports:
       - "8000:8000"
     deploy:
@@ -23,7 +23,7 @@ services:
   visualizer:
     image: henaras/visualizer
     ports:
-      - "5001:8080"
+      - "5000:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     deploy:
@@ -31,8 +31,19 @@ services:
         constraints: [node.role == manager]
 
   auto-scaler:
-    image: auto-scaler
+    image: mrboisvert/auto-scaler
     ports:
-      - "3000:3000"
+      - "7000:7000"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+  auto-scaler-plots:
+    image: mrboisvert/auto-scaler-plots
+    ports:
+      - "3000:3000"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
