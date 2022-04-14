@@ -1,4 +1,4 @@
-var socket = new WebSocket('wss://localhost:3000/');
+var socket = new WebSocket('ws://10.2.12.208:7000/');
 console.log("Hello");
 
 socket.onmessage = function (message) {

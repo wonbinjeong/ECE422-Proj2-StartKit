@@ -33,7 +33,7 @@ services:
   auto-scaler:
     image: mrboisvert/auto-scaler
     ports:
-      - "3000:3000"
+      - "7000:7000"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     deploy:
@@ -43,7 +43,7 @@ services:
   auto-scaler-plots:
     image: mrboisvert/auto-scaler-plots
     ports:
-      - "9000:9000"
+      - "3000:3000"
     deploy:
       placement:
         constraints: [node.role == manager]

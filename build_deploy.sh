@@ -1,4 +1,4 @@
-sudo docker build --build-arg ENABLED=0 -t mrboisvert/auto-scaler:latest docker-images/auto-scale-app
+sudo docker build -t mrboisvert/auto-scaler:latest docker-images/auto-scale-app
 sudo docker push mrboisvert/auto-scaler:latest
 sudo docker build -t mrboisvert/auto-scaler-plots:latest docker-images/graphs
 sudo docker push mrboisvert/auto-scaler-plots:latest
