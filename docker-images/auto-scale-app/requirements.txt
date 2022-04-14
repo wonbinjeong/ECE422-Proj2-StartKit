@@ -1,5 +1,3 @@
-Flask
 redis
-asyncio
-requests
 docker
+websockets
