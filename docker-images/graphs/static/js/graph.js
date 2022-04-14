@@ -4,7 +4,7 @@ console.log("Hello");
 socket.onmessage = function (message) {
     console.log(message);
     console.log(message.data);
-    data = JSON.parse(nessage.data);
+    data = JSON.parse(message.data);
     plot_workload(data.workload);
     plot_response_time(data.response_time);
     plot_application_size(data.application_size);
@@ -16,7 +16,8 @@ function plot_workload(data) {
     var layout = {
         title: "Workload Plot",
         xaxis: {
-            title: "Time"
+            title: "Time",
+            range: [0, 100]
         },
         yaxis: {
             title: "Requests/sec"
@@ -28,7 +29,7 @@ function plot_workload(data) {
         x: data.x,
         y: data.y
     };
-    Plotly.react(workload_plot, trace, layout);
+    Plotly.newPlot(workload_plot, [trace], layout);
 }
 
 function plot_response_time(data) {
@@ -37,7 +38,8 @@ function plot_response_time(data) {
     var layout = {
         title: "Response Time Plot",
         xaxis: {
-            title: "Time"
+            title: "Time",
+            range: [0, 100]
         },
         yaxis: {
             title: "Avg Response Time"
@@ -49,7 +51,7 @@ function plot_response_time(data) {
         x: data.x,
         y: data.y
     };
-    Plotly.react(response_time_plot, trace, layout);
+    Plotly.newPlot(response_time_plot, [trace], layout);
 }
 
 function plot_application_size(data) {
@@ -58,7 +60,8 @@ function plot_application_size(data) {
     var layout = {
         title: "Application Size Plot",
         xaxis: {
-            title: "Time"
+            title: "Time",
+            range: [0, 100]
         },
         yaxis: {
             title: "Number of replicas"
@@ -70,5 +73,5 @@ function plot_application_size(data) {
         x: data.x,
         y: data.y
     };
-    Plotly.react(application_size_plot, trace, layout);
+    Plotly.newPlot(application_size_plot, [trace], layout);
 }
