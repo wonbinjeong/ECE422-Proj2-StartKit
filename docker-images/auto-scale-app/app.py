@@ -9,6 +9,7 @@ import os
 import websockets
 import socket
 import json
+import subprocess
 
 redis = Redis(host='redis', port=6379)
 swarm_master_ip = '10.2.12.208'
@@ -32,23 +33,42 @@ def get_web_service():
     web_service = None
     for service in docker.from_env().services.list():
         print(service.name)
-        if service.name == 'app_name_web':
+        if service.name == 'auto_scale_web':
             web_service = service
     return web_service
 
 async def auto_scale(websocket, path):
     # get the web service
-    web_service = next((x for x in docker.from_env().services.list() if x.name == 'app_name_web'), None)
-    start_time = time()
-    '''
-    # start auto scaler
+    '''web_service = get_web_service()
     web_service.scale(5)
-    web_service.update()
-    web_service = next((x for x in docker.from_env().services.list() if x.name == 'app_name_web'), None)
+    sleep(5)
+    web_service = get_web_service()
+    web_service.scale(6)
+    sleep(5)
+    web_service = get_web_service()
+    web_service.scale(5)
+    sleep(5)
+    web_service = get_web_service()
     web_service.scale(4)
-    web_service.update()
-    web_service = next((x for x in docker.from_env().services.list() if x.name == 'app_name_web'), None)'''
+    sleep(5)
+    web_service = get_web_service()
+    web_service.scale(8)'''
+    '''client = docker.APIClient(base_url="unix:/var/run/docker.sock")
+    print(client.version)
+    replica_mode = docker.types.ServiceMode('replicated', replicas=5)
+    web_service = None
+    for service in docker.from_env().services.list():
+        print(service.name)
+        if service.name == 'app_name_web':
+            web_service = service
+    svc_version = client.inspect_service(web_service.id)['Version']['Index']
+    client.update_service(web_service.id, svc_version, mode=replica_mode)
 
+    replica_mode = docker.types.ServiceMode('replicated', replicas=6)
+    client.update_service(web_service.id, svc_version, mode=replica_mode)
+    start_time = time()'''
+    start_time = time()
+    # start auto scaler
     while True:
         # monitor response time
         start_monitoring_time = time()
@@ -59,7 +79,6 @@ async def auto_scale(websocket, path):
                 request = requests.get('http://' + swarm_master_ip + ':8000/')
                 response_time = request.elapsed.total_seconds()
                 response_times.append(response_time)
-                sleep(5)
             except Exception as e:
                 print("Requests exception")
                 print(e)
@@ -80,10 +99,8 @@ async def auto_scale(websocket, path):
                 num_containers = math.ceil(num_req / req_per_container)
                 print(f"scaling to {num_containers} containers")
                 try:
-                    # result = web_service.scale(num_containers)
-                    #sudo docker service update --replicas 4 app_name_web
-                    result = web_service.update(kwargs=["docker", "service", "update", "--repliacas", "4"])
-                    
+                    web_service = get_web_service()
+                    result = web_service.scale(num_containers)                    
                     print("scaled", result)
                 except Exception as e:
                     print("exception while scaling")
