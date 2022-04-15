@@ -1,5 +1,18 @@
-var socket = new WebSocket('ws://10.2.12.208:7000/');
+var socket = new WebSocket('ws://10.2.12.208:7000/', );
+let scale = true;
 console.log("Hello");
+
+function autoscale() {
+    let btn = document.getElementById("btnScale");
+    scale = !scale;
+    btnScale.innerText = (scale == true) ? "Scale" : "No Scale";
+    if (scale) {
+        socket.send("true");
+    }
+    else {
+        socket.send("false");
+    }
+}
 
 socket.onmessage = function (message) {
     console.log(message);
@@ -17,10 +30,11 @@ function plot_workload(data) {
         title: "Workload Plot",
         xaxis: {
             title: "Time",
-            range: [0, 100]
+            autorange: true
         },
         yaxis: {
-            title: "Requests/sec"
+            title: "Requests/sec",
+            autorange: true
         }
     };
     var trace = {
@@ -39,10 +53,11 @@ function plot_response_time(data) {
         title: "Response Time Plot",
         xaxis: {
             title: "Time",
-            range: [0, 100]
+            autorange: true
         },
         yaxis: {
-            title: "Avg Response Time"
+            title: "Avg Response Time",
+            autorange: true
         }
     };
     var trace = {
@@ -61,10 +76,11 @@ function plot_application_size(data) {
         title: "Application Size Plot",
         xaxis: {
             title: "Time",
-            range: [0, 100]
+            autorange: true
         },
         yaxis: {
-            title: "Number of replicas"
+            title: "Number of replicas",
+            autorange: true
         }
     };
     var trace = {

@@ -15,10 +15,10 @@ redis = Redis(host='redis', port=6379)
 swarm_master_ip = '10.2.12.208'
 
 # parameters for auto scaling algorithm
-upper_threshold = 1
-lower_threshold = 5
+upper_threshold = 4
+lower_threshold = 2
 monitoring_interval = 10
-req_per_container = 3
+req_per_container = 7
 
 # arrays for plotting
 workload_plot = []
@@ -26,7 +26,6 @@ response_time_plot = []
 num_replicas_plot = []
 time_plot = []
 
-num_containers = 1
 average_response_time = 0
 
 def get_web_service():
@@ -37,39 +36,32 @@ def get_web_service():
             web_service = service
     return web_service
 
-async def auto_scale(websocket, path):
-    # get the web service
-    '''web_service = get_web_service()
-    web_service.scale(5)
-    sleep(5)
-    web_service = get_web_service()
-    web_service.scale(6)
-    sleep(5)
-    web_service = get_web_service()
-    web_service.scale(5)
-    sleep(5)
-    web_service = get_web_service()
-    web_service.scale(4)
-    sleep(5)
-    web_service = get_web_service()
-    web_service.scale(8)'''
-    '''client = docker.APIClient(base_url="unix:/var/run/docker.sock")
-    print(client.version)
-    replica_mode = docker.types.ServiceMode('replicated', replicas=5)
-    web_service = None
-    for service in docker.from_env().services.list():
-        print(service.name)
-        if service.name == 'app_name_web':
-            web_service = service
-    svc_version = client.inspect_service(web_service.id)['Version']['Index']
-    client.update_service(web_service.id, svc_version, mode=replica_mode)
-
-    replica_mode = docker.types.ServiceMode('replicated', replicas=6)
-    client.update_service(web_service.id, svc_version, mode=replica_mode)
-    start_time = time()'''
+async def auto_scale(websocket):
     start_time = time()
+    scale = True
+    print("starting...")
+    num_containers = 1
     # start auto scaler
     while True:
+        data = None
+        try:
+            data = await asyncio.wait_for(websocket.recv(), timeout=3)
+            print(data)
+            if data == "true":
+                print("scaling")
+                scale = True
+            else:
+                print("no scaling")
+                scale = False
+                sleep(5)
+                web_service = get_web_service()
+                web_service.scale(1)
+                num_containers = 1
+            
+        except Exception as e:
+            print(e)
+
+
         # monitor response time
         start_monitoring_time = time()
         response_times = []
@@ -95,7 +87,7 @@ async def auto_scale(websocket, path):
             num_req = curr_hits - prev_hits
             print("number of requests: " + str(num_req))
             
-            if average_response_time > upper_threshold or average_response_time < lower_threshold:
+            if (average_response_time > upper_threshold or average_response_time < lower_threshold) and (scale == True):
                 num_containers = math.ceil(num_req / req_per_container)
                 print(f"scaling to {num_containers} containers")
                 try:
@@ -123,14 +115,8 @@ async def auto_scale(websocket, path):
             print("socket error")
             print(e)
 
-'''print("starting...")
-start_server = websockets.serve(auto_scale, '0.0.0.0', 7000)
-print("socket open")
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()'''
-
 async def main():
-    async with websockets.serve(auto_scale, '0.0.0.0', 7000):
+    async with websockets.serve(auto_scale, '0.0.0.0', 7000, ping_timeout=None):
         await asyncio.Future()  # run forever
 
 asyncio.run(main())
